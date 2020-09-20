@@ -16,8 +16,10 @@ public class UserService {
     }
 
     public ResponseDTO auth(UserDTO dto) {
-        User user = this.repository.findUserByEmail(dto.getEmail());
+        User user = this.repository.findUserByEmail(dto.getEmail()).get();
         ResponseDTO response = new ResponseDTO();
+
+        System.out.println(user);
 
         if(user == null) {
             response.setMessage("User with email {" + dto.getEmail() + "} not found");
@@ -37,6 +39,11 @@ public class UserService {
     }
 
     public Boolean save(UserDTO dto) {
+
+        if(this.repository.findUserByEmail(dto.getEmail()).isPresent()) {
+            return false;
+        }
+
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());

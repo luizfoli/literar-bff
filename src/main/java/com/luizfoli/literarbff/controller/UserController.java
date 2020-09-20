@@ -19,12 +19,12 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseDTO post(@RequestBody UserDTO dto) {
-        return this.service.auth(dto);
+    public Boolean postUser(@RequestBody UserDTO dto) {
+        return this.service.save(dto);
     }
 
     @PostMapping("/auth")
-    public Boolean postUser(@RequestBody UserDTO dto) {
-        return this.service.save(dto);
+    public ResponseDTO post(@RequestBody UserDTO dto) {
+        return this.service.auth(dto);
     }
 }
