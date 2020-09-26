@@ -1,9 +1,5 @@
 package com.luizfoli.literarbff.controller;
 
-import com.luizfoli.literarbff.dto.ResponseDTO;
-import com.luizfoli.literarbff.dto.UserDTO;
-import com.luizfoli.literarbff.service.UserService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,22 +7,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.luizfoli.literarbff.dto.AuthUserDTO;
+import com.luizfoli.literarbff.dto.ResponseDTO;
+import com.luizfoli.literarbff.service.AuthService;
+
 import java.util.Date;
 
 @RestController
-@RequestMapping("/user")
-public class UserController {
+@RequestMapping("/auth")
+public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-    private UserService service;
+    private AuthService service;
 
-    public UserController(UserService service) {
+    public AuthController(AuthService service) {
         this.service = service;
     }
 
     @PostMapping
-    public Boolean postUser(@RequestBody UserDTO dto) {
-        this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/user', method: 'POST'}");
-        return this.service.save(dto);
+    public ResponseDTO post(@RequestBody AuthUserDTO dto) {
+        this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', trace: 'controller'}");
+        return this.service.auth(dto);
     }
+
 }

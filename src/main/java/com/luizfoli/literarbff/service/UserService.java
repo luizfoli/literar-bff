@@ -1,11 +1,12 @@
 package com.luizfoli.literarbff.service;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.luizfoli.literarbff.dto.ResponseDTO;
 import com.luizfoli.literarbff.dto.UserDTO;
 import com.luizfoli.literarbff.model.User;
 import com.luizfoli.literarbff.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
@@ -16,27 +17,6 @@ public class UserService {
     public UserService(UserRepository repository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.repository = repository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    }
-
-    public ResponseDTO auth(UserDTO dto) {
-        User user = this.repository.findUserByEmail(dto.getEmail()).get();
-        ResponseDTO response = new ResponseDTO();
-
-        if(user == null) {
-            response.setMessage("User with email {" + dto.getEmail() + "} not found");
-            response.setSuccess(false);
-            return response;
-        }
-
-        if(bCryptPasswordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            response.setSuccess(true);
-            response.setMessage("Login was success");
-            return response;
-        }
-
-        response.setSuccess(false);
-        response.setMessage("Email and/or password wrongs");
-        return response;
     }
 
     public Boolean save(UserDTO dto) {
