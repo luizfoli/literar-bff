@@ -1,5 +1,6 @@
 package com.luizfoli.literarbff.service;
 
+import com.luizfoli.literarbff.config.jwt.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,10 +21,12 @@ public class AuthService {
 
     private UserRepository repository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private JwtUtil jwtUtil;
 
-    public AuthService(UserRepository repository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public AuthService(UserRepository repository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtil jwtUtil) {
         this.repository = repository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public ResponseDTO auth(AuthUserDTO dto) {
@@ -54,6 +57,9 @@ public class AuthService {
             response.setMessage(message);
             return response;
         }
+
+//        String jwtToken = this.jwtUtil.createJWT(user.getId().toString());
+        this.logger.info(jwtToken);
 
         String message = "Login was successfull";
         this.logger.error("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', " +
