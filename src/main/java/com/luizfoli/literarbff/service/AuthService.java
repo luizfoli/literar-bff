@@ -50,12 +50,11 @@ public class AuthService {
      */
 
    public ResponseDTO auth(AuthUserDTO dto) {
-        this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', trace: 'service'}");
+       this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', " +
+               "trace: 'controller.service', dto: " + dto.toString() + "}");
 
         try {
-
             this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
-
         } catch(BadCredentialsException e) {
             this.logger.error(e.getMessage());
         }
@@ -64,43 +63,35 @@ public class AuthService {
         ResponseDTO response = new ResponseDTO();
 
         if(user == null) {
-
             String message = "User with email {" + dto.getEmail() + "} not found";
-            this.logger.error("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', " +
-                    "method: 'POST', trace: 'service', msg: "+ message + "}");
-
             response.setMessage(message);
             response.setSuccess(false);
 
+            this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', " +
+                    "trace: 'controller.service', dto: " + dto.toString() + ", msg: '"+ message + "'}");
             return response;
         }
 
         if(!bCryptPasswordEncoder.matches(dto.getPassword(), user.getPassword())) {
-
             String message = "Email and/or password wrongs";
-            this.logger.error("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', " +
-                    "method: 'POST', trace: 'service', msg: "+ message + "}");
-
             response.setSuccess(false);
             response.setMessage(message);
+
+            this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', " +
+                    "trace: 'controller.service', dto: " + dto.toString() + ", msg: '"+ message + "'}");
             return response;
         }
 
         UserDetails userDetails = this.authDetailsService.loadUserByUsername(dto.getEmail());
         String token = jwtUtil.generateToken(userDetails);
 
-        String message = "Login was successfull";
+        String message = "Login was successfully";
         response.setSuccess(true);
         response.setMessage(message);
         response.setToken(token);
 
-       this.logger.info("{time_stamp: "+ new Date().getTime() +", " +
-               "path_req: '/auth', " +
-               "method: 'POST', trace: 'service', " +
-               "obj: {user_id: " + user.getId() + ", " +
-               "token: '" + token + "', " +
-               "msg: '" + message + "'}}");
-
+       this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', " +
+               "trace: 'controller.service', dto: " + dto.toString() + ", msg: '"+ message + "', token: '" + token + "'}");
         return response;
     };
 }

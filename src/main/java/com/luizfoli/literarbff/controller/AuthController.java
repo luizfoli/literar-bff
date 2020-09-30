@@ -26,7 +26,8 @@ public class AuthController {
 
     @PostMapping
     public ResponseDTO post(@RequestBody AuthUserDTO dto) {
-        this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', trace: 'controller'}");
+        this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', " +
+                "trace: 'controller', dto: " + dto.toString() + "}");
         return this.service.auth(dto);
     }
 
