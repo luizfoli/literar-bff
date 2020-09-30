@@ -1,10 +1,18 @@
 package com.luizfoli.literarbff.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +24,21 @@ import com.luizfoli.literarbff.model.User;
 import com.luizfoli.literarbff.repository.UserRepository;
 
 @Service
-public class AuthService {
+public class AuthService extends implements UserDetailsService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private UserRepository repository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
     private JwtUtil jwtUtil;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private AuthenticationManager authenticationManager;
 
-
-    public AuthService(UserRepository repository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository repository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtil jwtUtil,
+                       AuthenticationManager authenticationManager) {
         this.repository = repository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtUtil = jwtUtil;
+        this.authenticationManager = authenticationManager;
     }
 
     /**
@@ -39,6 +49,14 @@ public class AuthService {
 
    public ResponseDTO auth(AuthUserDTO dto) {
         this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', trace: 'service'}");
+
+        try {
+
+            this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword()));
+
+        } catch(BadCredentialsException e) {
+            this.logger.error(e.getMessage());
+        }
 
         User user = this.repository.findUserByEmail(dto.getEmail()).get();
         ResponseDTO response = new ResponseDTO();
@@ -82,4 +100,15 @@ public class AuthService {
 
         return response;
     };
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> user = this.repository.findUserByEmail(username);
+
+        if(!user.isPresent()) {
+            return null;
+        }
+
+        return new org.springframework.security.core.userdetails.User(user.get().getEmail(), user.get().getPassword(), new ArrayList<>());
+    }
 }

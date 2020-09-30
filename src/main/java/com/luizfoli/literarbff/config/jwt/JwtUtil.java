@@ -1,5 +1,7 @@
 package com.luizfoli.literarbff.config.jwt;
 
+import com.luizfoli.literarbff.model.User;
+import com.luizfoli.literarbff.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -13,6 +15,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -21,6 +24,12 @@ public class JwtUtil {
     @Value("{jwt.secret}")
     private String secretKey;
     private int lifecyle = 1000 * 60 * 60 * 10;
+
+    private UserRepository repository;
+
+    public JwtUtil(UserRepository repository) {
+        this.repository = repository;
+    }
 
     /**
      * @param userId
@@ -76,14 +85,37 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS256, secretKey).compact();
     }
 
+    /**
+     * @param token
+     * @return
+     */
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     }
 
+    /**
+     * @param token
+     * @return
+     */
+
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
+    /**
+     *
+     * @param token
+     * @return
+     */
+
+    public Boolean validateToken(String token) {
+        String id = extractUserId(token);
+        if(id == null) {
+            return false;
+        }
+        final Optional<User> user = this.repository.findById(Long.parseLong(id));
+        return ( user.isPresent() && !isTokenExpired(token));
+    }
 
 }
