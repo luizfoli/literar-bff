@@ -7,6 +7,7 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -31,14 +32,9 @@ public class JwtUtil {
         this.repository = repository;
     }
 
-    /**
-     * @param userId
-     * @return JWT Token
-     */
-
-    public String generateToken(long userId) {
+    public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userId);
+        return createToken(claims, userDetails.getUsername());
     }
 
     /**
@@ -46,7 +42,7 @@ public class JwtUtil {
      * @return
      */
 
-    public String extractUserId(String token) {
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -71,15 +67,9 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
 
-    /**
-     * @param claims
-     * @param userId
-     * @return
-     */
-
-    private String createToken(Map<String, Object> claims, Long userId) {
+    private String createToken(Map<String, Object> claims, String username) {
         return Jwts.builder().setClaims(claims)
-                .setSubject(userId.toString())
+                .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + lifecyle))
                 .signWith(SignatureAlgorithm.HS256, secretKey).compact();
@@ -109,13 +99,10 @@ public class JwtUtil {
      * @return
      */
 
-    public Boolean validateToken(String token) {
-        String id = extractUserId(token);
-        if(id == null) {
-            return false;
-        }
-        final Optional<User> user = this.repository.findById(Long.parseLong(id));
-        return ( user.isPresent() && !isTokenExpired(token));
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        String username = extractUsername(token);
+        Boolean isEquals = username.equals(userDetails.getUsername());
+        return ( username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
 }

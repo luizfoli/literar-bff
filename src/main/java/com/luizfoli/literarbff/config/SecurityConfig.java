@@ -1,6 +1,7 @@
 package com.luizfoli.literarbff.config;
 
 import com.luizfoli.literarbff.config.jwt.JwtRequestFilter;
+import com.luizfoli.literarbff.service.AuthDetailsService;
 import com.luizfoli.literarbff.service.AuthService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,17 +26,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/user"
     };
 
-    private AuthService authService;
+    private AuthDetailsService authDetailsService;
     private JwtRequestFilter jwtRequestFiler;
 
-    public SecurityConfig(AuthService authService, JwtRequestFilter jwtRequestFiler) {
-        this.authService = authService;
+    public SecurityConfig(AuthDetailsService authDetailsService, JwtRequestFilter jwtRequestFiler) {
+        this.authDetailsService = authDetailsService;
         this.jwtRequestFiler = jwtRequestFiler;
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(this.authService);
+        auth.userDetailsService(this.authDetailsService);
     }
 
     @Override

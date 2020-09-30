@@ -24,7 +24,7 @@ import com.luizfoli.literarbff.model.User;
 import com.luizfoli.literarbff.repository.UserRepository;
 
 @Service
-public class AuthService extends implements UserDetailsService {
+public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -32,13 +32,15 @@ public class AuthService extends implements UserDetailsService {
     private JwtUtil jwtUtil;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private AuthenticationManager authenticationManager;
+    private AuthDetailsService authDetailsService;
 
     public AuthService(UserRepository repository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtil jwtUtil,
-                       AuthenticationManager authenticationManager) {
+                       AuthenticationManager authenticationManager, AuthDetailsService authDetailsService) {
         this.repository = repository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
+        this.authDetailsService = authDetailsService;
     }
 
     /**
@@ -84,7 +86,8 @@ public class AuthService extends implements UserDetailsService {
             return response;
         }
 
-        String token = jwtUtil.generateToken(user.getId());
+        UserDetails userDetails = this.authDetailsService.loadUserByUsername(dto.getEmail());
+        String token = jwtUtil.generateToken(userDetails);
 
         String message = "Login was successfull";
         response.setSuccess(true);
@@ -100,15 +103,4 @@ public class AuthService extends implements UserDetailsService {
 
         return response;
     };
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = this.repository.findUserByEmail(username);
-
-        if(!user.isPresent()) {
-            return null;
-        }
-
-        return new org.springframework.security.core.userdetails.User(user.get().getEmail(), user.get().getPassword(), new ArrayList<>());
-    }
 }
