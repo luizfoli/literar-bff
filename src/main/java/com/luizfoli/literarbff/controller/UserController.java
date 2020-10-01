@@ -1,6 +1,5 @@
 package com.luizfoli.literarbff.controller;
 
-import com.luizfoli.literarbff.dto.ResponseDTO;
 import com.luizfoli.literarbff.dto.UserDTO;
 import com.luizfoli.literarbff.service.UserService;
 

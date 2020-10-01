@@ -1,4 +1,4 @@
-package com.luizfoli.literarbff.dto;
+package com.luizfoli.literarbff.dto.response;
 
 public class ResponseDTO {
 

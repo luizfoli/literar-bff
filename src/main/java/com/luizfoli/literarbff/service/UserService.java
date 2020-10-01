@@ -3,7 +3,6 @@ package com.luizfoli.literarbff.service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.luizfoli.literarbff.dto.ResponseDTO;
 import com.luizfoli.literarbff.dto.UserDTO;
 import com.luizfoli.literarbff.model.User;
 import com.luizfoli.literarbff.repository.UserRepository;

@@ -1,25 +1,21 @@
 package com.luizfoli.literarbff.service;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Optional;
 
+import com.luizfoli.literarbff.dto.response.AuthUserResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.luizfoli.literarbff.config.jwt.JwtUtil;
 import com.luizfoli.literarbff.controller.UserController;
 import com.luizfoli.literarbff.dto.AuthUserDTO;
-import com.luizfoli.literarbff.dto.ResponseDTO;
+import com.luizfoli.literarbff.dto.response.ResponseDTO;
 import com.luizfoli.literarbff.model.User;
 import com.luizfoli.literarbff.repository.UserRepository;
 
@@ -46,10 +42,10 @@ public class AuthService {
     /**
      * Method reponsible for auth the user
      * @param dto
-     * @return ResponseDTO object
+     * @return AuthUserResponseDTO object
      */
 
-   public ResponseDTO auth(AuthUserDTO dto) {
+   public AuthUserResponseDTO auth(AuthUserDTO dto) {
        this.logger.info("{time_stamp: "+ new Date().getTime() +", path_req: '/auth', method: 'POST', " +
                "trace: 'controller.service', dto: " + dto.toString() + "}");
 
@@ -60,7 +56,7 @@ public class AuthService {
         }
 
         User user = this.repository.findUserByEmail(dto.getEmail()).get();
-        ResponseDTO response = new ResponseDTO();
+        AuthUserResponseDTO response = new AuthUserResponseDTO();
 
         if(user == null) {
             String message = "User with email {" + dto.getEmail() + "} not found";
@@ -86,6 +82,10 @@ public class AuthService {
         String token = jwtUtil.generateToken(userDetails);
 
         String message = "Login was successfully";
+        response.setId(user.getId());
+        response.setEmail(user.getEmail());
+        response.setName(user.getName());
+        response.setLastName(user.getLastName());
         response.setSuccess(true);
         response.setMessage(message);
         response.setToken(token);
